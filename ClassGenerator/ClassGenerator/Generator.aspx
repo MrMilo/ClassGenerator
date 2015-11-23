@@ -36,6 +36,10 @@
                         <label for="txtTableName">Table Name</label>
                         <asp:TextBox ID="txtTableName" runat="server"></asp:TextBox>
                     </div>
+                    <div class="form-group">
+                        <label for="txtSPPrefix">Store Procedure Prefix</label>
+                        <asp:TextBox ID="txtSPPrefix" runat="server"></asp:TextBox>
+                    </div>
 
                     <div class="form-group">
                         <label for="txtField">Enter field according to sample format</label>

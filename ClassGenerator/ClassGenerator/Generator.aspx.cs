@@ -13,6 +13,7 @@ namespace ClassGenerator
             {
                 txtField.Text += "pkField,pk;" + Environment.NewLine;
                 txtField.Text += "intField,int;" + Environment.NewLine;
+                txtField.Text += "doubleField,double;" + Environment.NewLine;
                 txtField.Text += "stringField,str;" + Environment.NewLine;
                 txtField.Text += "booleanField,bool;" + Environment.NewLine;
                 txtField.Text += "datetimeField,dt";
@@ -84,6 +85,11 @@ namespace ClassGenerator
                                            " { get; set; } = false;" +
                                            Environment.NewLine + Environment.NewLine;
                         break;
+                    case "double":
+                        generatedString += "\tpublic double " + fieldWord[0].Replace(Environment.NewLine, string.Empty) +
+                                           " { get; set; } = 0;" +
+                                           Environment.NewLine + Environment.NewLine;
+                        break;
                 }
             }
 
@@ -111,7 +117,7 @@ namespace ClassGenerator
             generatedString += "\t\t\tconn.Open();" + Environment.NewLine;
             if (useStoredProcedure)
             {
-                generatedString += "\t\t\tstring strsql = \"" + tableName + "_NewRecord\";" + Environment.NewLine;
+                generatedString += "\t\t\tstring strsql = \"" + txtSPPrefix.Text + "_NewRecord\";" + Environment.NewLine;
                 generatedString +=
                     "\t\t\tSqlCommand cmd = new SqlCommand(strsql, conn) {CommandType = CommandType.StoredProcedure};" +
                     Environment.NewLine;
@@ -133,6 +139,7 @@ namespace ClassGenerator
                         case "str":
                         case "dt":
                         case "bool":
+                        case "double":
                             inlineSQL += fieldWord[0].Replace(Environment.NewLine, string.Empty) + ", ";
                             break;
                         case "pk":
@@ -154,6 +161,7 @@ namespace ClassGenerator
                         case "str":
                         case "dt":
                         case "bool":
+                        case "double":
                             inlineSQL += "@" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + ", ";
                             break;
                         case "pk":
@@ -206,7 +214,7 @@ namespace ClassGenerator
             generatedString += "\t\t\tconn.Open();" + Environment.NewLine;
             if (useStoredProcedure)
             {
-                generatedString += "\t\t\tstring strsql = \"" + tableName + "_UpdateRecord\";" + Environment.NewLine;
+                generatedString += "\t\t\tstring strsql = \"" + txtSPPrefix.Text + "_UpdateRecord\";" + Environment.NewLine;
                 generatedString += "\t\t\tSqlCommand cmd = new SqlCommand(strsql, conn) {CommandType = CommandType.StoredProcedure};" + Environment.NewLine;
             }
             else
@@ -226,6 +234,7 @@ namespace ClassGenerator
                         case "str":
                         case "dt":
                         case "bool":
+                        case "double":
                             inlineSQL += fieldWord[0].Replace(Environment.NewLine, string.Empty) + " = @" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + ", ";
                             break;
                         case "pk":
@@ -247,6 +256,7 @@ namespace ClassGenerator
                         case "str":
                         case "dt":
                         case "bool":
+                        case "double":
                             break;
                         case "pk":
                             inlineSQL += fieldWord[0].Replace(Environment.NewLine, string.Empty) + " = @" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "" + Environment.NewLine;
@@ -291,7 +301,7 @@ namespace ClassGenerator
             generatedString += "\t\t\tconn.Open();" + Environment.NewLine;
             if (useStoredProcedure)
             {
-                generatedString += "\t\t\tstring strsql = \"" + tableName + "_DeleteRecord\";" + Environment.NewLine;
+                generatedString += "\t\t\tstring strsql = \"" + txtSPPrefix.Text + "_DeleteRecord\";" + Environment.NewLine;
                 generatedString +=
                     "\t\t\tSqlCommand cmd = new SqlCommand(strsql, conn) {CommandType = CommandType.StoredProcedure};" +
                     Environment.NewLine;
@@ -315,6 +325,7 @@ namespace ClassGenerator
                         case "str":
                         case "dt":
                         case "bool":
+                        case "double":
                             break;
                         case "pk":
                             inlineSQL += fieldWord[0].Replace(Environment.NewLine, string.Empty) + " = @" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "" + Environment.NewLine;
@@ -362,7 +373,7 @@ namespace ClassGenerator
             generatedString += "\t\t\tconn.Open();" + Environment.NewLine;
             if (useStoredProcedure)
             {
-                generatedString += "\t\t\tstring strsql = \"" + className + "_ReadRecord\";" + Environment.NewLine;
+                generatedString += "\t\t\tstring strsql = \"" + txtSPPrefix.Text + "_ReadRecord\";" + Environment.NewLine;
                 generatedString +=
                     "\t\t\tSqlCommand cmd = new SqlCommand(strsql, conn) {CommandType = CommandType.StoredProcedure};" +
                     Environment.NewLine;
@@ -382,24 +393,18 @@ namespace ClassGenerator
                     switch (fieldWord[1])
                     {
                         case "int":
-                            inlineSQL += fieldWord[0].Replace(Environment.NewLine, string.Empty) + ", ";
-                            break;
                         case "str":
-                            inlineSQL += fieldWord[0].Replace(Environment.NewLine, string.Empty) + ", ";
-                            break;
                         case "dt":
-                            inlineSQL += fieldWord[0].Replace(Environment.NewLine, string.Empty) + ", ";
-                            break;
                         case "bool":
-                            inlineSQL += fieldWord[0].Replace(Environment.NewLine, string.Empty) + ", ";
-                            break;
+                        case "double":
                         case "pk":
+                            inlineSQL += fieldWord[0].Replace(Environment.NewLine, string.Empty) + ", ";
                             break;
                     }
                 }
                 inlineSQL = inlineSQL.TrimEnd(',', ' ');
                 inlineSQL += "\" +";
-                inlineSQL += Environment.NewLine + "\t\t\t\t\t\t\" WHERE ";
+                inlineSQL += Environment.NewLine + "\t\t\t\t\t\t\" FROM " + tableName + " WHERE ";
                 foreach (var field in fieldText.Split(';'))
                 {
                     var fieldWord = field.Split(',');
@@ -412,6 +417,7 @@ namespace ClassGenerator
                         case "str":
                         case "dt":
                         case "bool":
+                        case "double":
                             break;
                         case "pk":
                             inlineSQL += fieldWord[0].Replace(Environment.NewLine, string.Empty) + " = @" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "" + Environment.NewLine;
@@ -468,6 +474,10 @@ namespace ClassGenerator
                         generatedString += "\t\t\t\t" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " = (Boolean)" + "dr[\"" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "\"];" +
                                            Environment.NewLine;
                         break;
+                    case "double":
+                        generatedString += "\t\t\t\t" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " = (double)" + "dr[\"" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "\"];" +
+                                           Environment.NewLine;
+                        break;
                 }
             }
 
@@ -488,7 +498,7 @@ namespace ClassGenerator
             string generatedString = "";
 
             generatedString += "-- INSERT PROCEDURE" + Environment.NewLine;
-            generatedString += "CREATE PROCEDURE " + tableName + "_NewRecord" + Environment.NewLine;
+            generatedString += "CREATE PROCEDURE " + txtSPPrefix.Text + "_NewRecord" + Environment.NewLine;
 
             //loop though the multiline
             foreach (var field in fieldText.Split(';'))
@@ -511,6 +521,9 @@ namespace ClassGenerator
                     case "bool":
                         generatedString += "\t@" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " bit," + Environment.NewLine;
                         break;
+                    case "double":
+                        generatedString += "\t@" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " decimal(19,2)," + Environment.NewLine;
+                        break;
                     case "pk":
                         break;
                 }
@@ -518,7 +531,7 @@ namespace ClassGenerator
             generatedString = generatedString.TrimEnd(',', '\r', '\n');
 
             generatedString += Environment.NewLine + "AS" + Environment.NewLine + "BEGIN" + Environment.NewLine;
-            generatedString += "\t" + "SET NOCOUNT ON;" + Environment.NewLine;
+            generatedString += "\t" + "SET NOCOUNT OFF;" + Environment.NewLine;
             generatedString += "\t" + "INSERT INTO "+ tableName +"(" + Environment.NewLine;
             foreach (var field in fieldText.Split(';'))
             {
@@ -532,6 +545,7 @@ namespace ClassGenerator
                     case "str":
                     case "dt":
                     case "bool":
+                    case "double":
                         generatedString += "\t" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "," + Environment.NewLine;
                         break;
                     case "pk":
@@ -553,6 +567,7 @@ namespace ClassGenerator
                     case "str":
                     case "dt":
                     case "bool":
+                    case "double":
                         generatedString += "\t@" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "," + Environment.NewLine;
                         break;
                     case "pk":
@@ -571,7 +586,7 @@ namespace ClassGenerator
             string generatedString = "";
 
             generatedString += "-- UPDATE PROCEDURE" + Environment.NewLine;
-            generatedString += "CREATE PROCEDURE " + tableName + "_UpdateRecord" + Environment.NewLine;
+            generatedString += "CREATE PROCEDURE " + txtSPPrefix.Text + "_UpdateRecord" + Environment.NewLine;
 
             //loop though the multiline
             foreach (var field in fieldText.Split(';'))
@@ -582,6 +597,9 @@ namespace ClassGenerator
 
                 switch (fieldWord[1])
                 {
+                    case "pk":
+                        generatedString += "\t@" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " int," + Environment.NewLine;
+                        break;
                     case "int":
                         generatedString += "\t@" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " int," + Environment.NewLine;
                         break;
@@ -594,14 +612,15 @@ namespace ClassGenerator
                     case "bool":
                         generatedString += "\t@" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " bit," + Environment.NewLine;
                         break;
-                    case "pk":
+                    case "double":
+                        generatedString += "\t@" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " double(19,2)," + Environment.NewLine;
                         break;
                 }
             }
             generatedString = generatedString.TrimEnd(',', '\r', '\n');
 
             generatedString += Environment.NewLine + "AS" + Environment.NewLine + "BEGIN" + Environment.NewLine;
-            generatedString += "\t" + "SET NOCOUNT ON;" + Environment.NewLine;
+            generatedString += "\t" + "SET NOCOUNT OFF;" + Environment.NewLine;
             generatedString += "\t" + "UPDATE " + tableName + Environment.NewLine + "\tSET " + Environment.NewLine;
             foreach (var field in fieldText.Split(';'))
             {
@@ -615,6 +634,7 @@ namespace ClassGenerator
                     case "str":
                     case "dt":
                     case "bool":
+                    case "double":
                         generatedString += "\t" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " = @" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "," + Environment.NewLine;
                         break;
                     case "pk":
@@ -635,6 +655,7 @@ namespace ClassGenerator
                     case "str":
                     case "dt":
                     case "bool":
+                    case "double":
                         break;
                     case "pk":
                         generatedString += fieldWord[0].Replace(Environment.NewLine, string.Empty) + " = @" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "" + Environment.NewLine;
@@ -651,7 +672,7 @@ namespace ClassGenerator
             string generatedString = "";
 
             generatedString += "-- DELETE PROCEDURE" + Environment.NewLine;
-            generatedString += "CREATE PROCEDURE " + tableName + "_DeleteRecord" + Environment.NewLine;
+            generatedString += "CREATE PROCEDURE " + txtSPPrefix.Text + "_DeleteRecord" + Environment.NewLine;
 
             //loop though the multiline
             foreach (var field in fieldText.Split(';'))
@@ -666,6 +687,7 @@ namespace ClassGenerator
                     case "str":
                     case "dt":
                     case "bool":
+                    case "double":
                         break;
                     case "pk":
                         generatedString += "\t@" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " int" + Environment.NewLine;
@@ -675,7 +697,7 @@ namespace ClassGenerator
             generatedString = generatedString.TrimEnd(',', '\r', '\n');
 
             generatedString += Environment.NewLine + "AS" + Environment.NewLine + "BEGIN" + Environment.NewLine;
-            generatedString += "\t" + "SET NOCOUNT ON;" + Environment.NewLine;
+            generatedString += "\t" + "SET NOCOUNT OFF;" + Environment.NewLine;
             generatedString += "\t" + "DELETE FROM " + tableName + Environment.NewLine + "\tWHERE ";
             foreach (var field in fieldText.Split(';'))
             {
@@ -689,6 +711,7 @@ namespace ClassGenerator
                     case "str":
                     case "dt":
                     case "bool":
+                    case "double":
                         break;
                     case "pk":
                         generatedString += fieldWord[0].Replace(Environment.NewLine, string.Empty) + " = @" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "" + Environment.NewLine;
@@ -705,7 +728,7 @@ namespace ClassGenerator
             string generatedString = "";
 
             generatedString += "-- SELECT PROCEDURE" + Environment.NewLine;
-            generatedString += "CREATE PROCEDURE " + tableName + "_ReadRecord" + Environment.NewLine;
+            generatedString += "CREATE PROCEDURE " + txtSPPrefix.Text + "_ReadRecord" + Environment.NewLine;
             foreach (var field in fieldText.Split(';'))
             {
                 var fieldWord = field.Split(',');
@@ -718,6 +741,7 @@ namespace ClassGenerator
                     case "str":
                     case "dt":
                     case "bool":
+                    case "double":
                         break;
                     case "pk":
                         generatedString += "\t@" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + " int" + Environment.NewLine;
@@ -725,7 +749,7 @@ namespace ClassGenerator
                 }
             }
             generatedString += "AS" + Environment.NewLine + "BEGIN" + Environment.NewLine;
-            generatedString += "\tSET NOCOUNT ON;" + Environment.NewLine;
+            generatedString += "\tSET NOCOUNT OFF;" + Environment.NewLine;
             generatedString += "\tSELECT" + Environment.NewLine;
             //loop though the multiline
             foreach (var field in fieldText.Split(';'))
@@ -737,23 +761,17 @@ namespace ClassGenerator
                 switch (fieldWord[1])
                 {
                     case "int":
-                        generatedString += "\t" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "," + Environment.NewLine;
-                        break;
                     case "str":
-                        generatedString += "\t" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "," + Environment.NewLine;
-                        break;
                     case "dt":
-                        generatedString += "\t" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "," + Environment.NewLine;
-                        break;
                     case "bool":
-                        generatedString += "\t" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "," + Environment.NewLine;
-                        break;
+                    case "double":
                     case "pk":
+                        generatedString += "\t" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "," + Environment.NewLine;
                         break;
                 }
             }
             generatedString = generatedString.TrimEnd(',', '\r', '\n');
-            generatedString += Environment.NewLine + "\tWHERE ";
+            generatedString += Environment.NewLine + "\tFROM " + txtTableName.Text + Environment.NewLine + "\tWHERE ";
             foreach (var field in fieldText.Split(';'))
             {
                 var fieldWord = field.Split(',');
@@ -766,6 +784,7 @@ namespace ClassGenerator
                     case "str":
                     case "dt":
                     case "bool":
+                    case "double":
                         break;
                     case "pk":
                         generatedString += fieldWord[0].Replace(Environment.NewLine, string.Empty) + " = @" + fieldWord[0].Replace(Environment.NewLine, string.Empty) + "" + Environment.NewLine;
